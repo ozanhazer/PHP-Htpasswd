@@ -80,6 +80,11 @@ class Htpasswd
         return array_key_exists($username, $this->_users);
     }
 
+    public function getUsers()
+    {
+        return $this->_users;
+    }
+
     public function addUser($username, $password, $encType = self::ENCTYPE_CRYPT)
     {
         if ($this->userExists($username)) {
