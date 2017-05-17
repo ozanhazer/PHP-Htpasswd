@@ -1,0 +1,20 @@
+{
+    "name": "ozanhazer/php-htpasswd",
+    "description": "A lightweight - single class - library to read and write htpasswd. You can add or delete users or you can update their passwords...",
+    "type": "library",
+    "keywords": [
+        "php", "htpasswd"
+    ],
+    "authors": [
+        {
+            "name": "M.Ozan Hazer",
+            "email": "ozanhazer@gmail.com"
+        }
+    ],
+    "homepage": "https://github.com/ozanhazer/PHP-Htpasswd",
+    "autoload": {
+        "psr-0": {
+            "Htpasswd": ""
+        }
+    }
+}
