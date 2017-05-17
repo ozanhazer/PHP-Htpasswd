@@ -48,7 +48,7 @@ class Htpasswd
 
     public function __construct($filename)
     {
-        if (!trim($filename)) {
+        if (!isset($filename) || !trim($filename)) {
             throw new InvalidArgumentException('File name not sent');
         }
 
