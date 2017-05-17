@@ -53,7 +53,7 @@ class Htpasswd
         }
 
         if (!file_exists($filename)) {
-            throw new Exception('File not found');
+            throw new DomainException('Password file could not be found');
         }
 
         /**
