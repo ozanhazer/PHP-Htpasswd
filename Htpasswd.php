@@ -35,12 +35,12 @@ class Htpasswd
     /**
      * @var string
      */
-    private $_filename;
+    protected $_filename;
 
     /**
      * @var array
      */
-    private $_users = array();
+    protected $_users = array();
 
     const ENCTYPE_CRYPT   = 'crypt';
     const ENCTYPE_APR_MD5 = 'apr_md5';
@@ -115,7 +115,7 @@ class Htpasswd
         return true;
     }
 
-    private function _encryptPassword($password, $encType)
+    protected function _encryptPassword($password, $encType)
     {
         if ($encType == self::ENCTYPE_CRYPT) {
             if (strlen($password) > 8) {
@@ -138,7 +138,7 @@ class Htpasswd
         return $cryptPass;
     }
 
-    private function _validateUserName($username)
+    protected function _validateUserName($username)
     {
         if (strpos($username, ':')) {
             throw new Exception('Invalid username. Username cannot contain colon (:) character');
@@ -149,7 +149,7 @@ class Htpasswd
         }
     }
 
-    private function _saveFile()
+    protected function _saveFile()
     {
         $data = '';
         foreach ($this->_users as $username => $pass) {
@@ -159,7 +159,7 @@ class Htpasswd
         file_put_contents($this->_filename, $data, LOCK_EX);
     }
 
-    private function _cryptApr1Md5($plainpasswd)
+    protected function _cryptApr1Md5($plainpasswd)
     {
         $salt = substr(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), 0, 8);
         $len  = strlen($plainpasswd);
