@@ -1,5 +1,7 @@
 # PHP-Htpasswd
 
+![Unit Tests](https://github.com/ozanhazer/PHP-Htpasswd/actions/workflows/php.yml/badge.svg)
+
 PHP Htpasswd writer for Apache. You can add or delete users, or update their passwords.
 
 ## Features
