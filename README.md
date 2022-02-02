@@ -7,7 +7,7 @@ PHP Htpasswd writer for Apache. You can add or delete users, or update their pas
  * Supports `crypt`, `md5` and `sha1` algorithms
  * Locks the htpasswd file to prevent conflicts while writing.
  * Throws an error on invalid usernames.
- * Tested on Windows and debian (apache only)
+ * Unit tested.
  * Whole htpasswd file is read into the memory so be careful if you have lots of users
 (In fact you should consider a different kind of authentication mechanism if you
 have that many users)
@@ -32,6 +32,10 @@ $htpasswd->addUser('ozan', '123456', Htpasswd::ENCTYPE_SHA1);
 
 (Yes, you may use different algorithms per user in the same passwd file...)
 
-**Make sure that you use either ```ENCTYPE_APR_MD5``` or ```ENCTYPE_SHA1``` on Windows servers as "crypt" is not available on Windows.**
-
 See [the Apache documentation](https://httpd.apache.org/docs/2.2/misc/password_encryptions.html) for encryption details. 
+
+## Tips
+
+* Do not prefer `ENCTYPE_CRYPT` on Windows servers since it's not available on Windows by default.
+* `ENCTYPE_CRYPT` passwords are limited to 8 characters and extra characters will be ignored so the library will trigger 
+  a notice if long passwords are provided.
