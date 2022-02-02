@@ -16,5 +16,11 @@
         "psr-0": {
             "Htpasswd": ""
         }
+    },
+    "require": {
+        "php": "^7.2|^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
     }
 }
