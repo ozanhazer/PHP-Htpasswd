@@ -1,6 +1,7 @@
 {
     "name": "ozanhazer/php-htpasswd",
     "description": "A lightweight - single class - library to read and write htpasswd. You can add or delete users or you can update their passwords...",
+    "license": "MIT",
     "type": "library",
     "keywords": [
         "php", "htpasswd"
