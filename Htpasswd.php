@@ -90,7 +90,7 @@ class Htpasswd
 
             $chars     = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
             $len       = strlen($chars) - 1;
-            $salt      = $chars[mt_rand(0, $len)] . $chars[mt_rand(0, $len)];
+            $salt      = $chars[random_int(0, $len)] . $chars[random_int(0, $len)];
             $cryptPass = crypt($password, $salt);
         } elseif ($encType == self::ENCTYPE_APR_MD5) {
             $cryptPass = $this->_cryptApr1Md5($password);
@@ -127,7 +127,11 @@ class Htpasswd
 
     protected function _cryptApr1Md5($plainpasswd)
     {
-        $salt = substr(str_shuffle("abcdefghijklmnopqrstuvwxyz0123456789"), 0, 8);
+        $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        $salt = '';
+        for ($i = 0; $i < 8; $i++) {
+            $salt .= $chars[random_int(0, strlen($chars) - 1)];
+        }
         $len  = strlen($plainpasswd);
         $text = $plainpasswd . '$apr1$' . $salt;
         $bin  = pack("H32", md5($plainpasswd . $salt . $plainpasswd));
