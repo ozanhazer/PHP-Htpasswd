@@ -226,6 +226,7 @@ public static function invalidUserNames(): array
             [Htpasswd::ENCTYPE_APR_MD5],
             [Htpasswd::ENCTYPE_CRYPT],
             [Htpasswd::ENCTYPE_SHA1],
+            [Htpasswd::ENCTYPE_BCRYPT],
         ];
     }
 
@@ -241,6 +242,9 @@ public static function invalidUserNames(): array
             case Htpasswd::ENCTYPE_SHA1:
                 $str = '{SHA}' . base64_encode(sha1($plainPass, true));
                 $this->assertSame($str, $encryptedPass);
+                break;
+            case Htpasswd::ENCTYPE_BCRYPT:
+                $this->assertTrue(password_verify($plainPass, $encryptedPass));
                 break;
             default:
                 $this->fail('Invalid enctype: ' . $encType);

@@ -14,6 +14,7 @@ class Htpasswd
     const ENCTYPE_CRYPT   = 'crypt';
     const ENCTYPE_APR_MD5 = 'apr_md5';
     const ENCTYPE_SHA1    = 'sha1';
+    const ENCTYPE_BCRYPT  = 'bcrypt';
 
     public function __construct($filename)
     {
@@ -97,6 +98,8 @@ class Htpasswd
         } elseif ($encType == self::ENCTYPE_SHA1) {
             $hash      = base64_encode(sha1($password, true));
             $cryptPass = '{SHA}' . $hash;
+        } elseif ($encType == self::ENCTYPE_BCRYPT) {
+            $cryptPass = password_hash($password, PASSWORD_BCRYPT);
         } else {
             throw new Exception('Invalid encryption type');
         }
