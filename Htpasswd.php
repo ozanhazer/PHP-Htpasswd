@@ -30,7 +30,10 @@ class Htpasswd
         if (count($lines)) {
             foreach ($lines as $line) {
                 $line = trim($line);
-                list($user, $pass) = explode(':', $line);
+                if (strpos($line, ':') === false) {
+                    continue;
+                }
+                [$user, $pass] = explode(':', $line, 2);
                 $this->_users[$user] = $pass;
             }
         }
@@ -103,7 +106,7 @@ class Htpasswd
 
     protected function _validateUserName($username)
     {
-        if (strpos($username, ':')) {
+        if (strpos($username, ':') !== false) {
             throw new Exception('Invalid username. Username cannot contain colon (:) character');
         }
 
