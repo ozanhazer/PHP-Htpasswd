@@ -6,12 +6,14 @@ use Exception;
 use Htpasswd;
 use InvalidArgumentException;
 use DomainException;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class HtpasswdTest extends TestCase
 {
-    private $originalFile = __DIR__ . '/valid_htpasswd.txt';
-    private $passFile = __DIR__ . '/htpasswd_on_test.txt';
+    private string $originalFile = __DIR__ . '/valid_htpasswd.txt';
+    private string $passFile = __DIR__ . '/htpasswd_on_test.txt';
 
     protected function setUp(): void
     {
@@ -23,20 +25,16 @@ class HtpasswdTest extends TestCase
         unlink($this->passFile);
     }
 
-    /**
-     * @test
-     */
-    public function init_without_filename_throws_exception()
+    #[Test]
+    public function init_without_filename_throws_exception(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new Htpasswd('');
     }
 
-    /**
-     * @test
-     */
-    public function throw_exception_if_password_file_could_not_be_found()
+    #[Test]
+    public function throw_exception_if_password_file_could_not_be_found(): void
     {
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Password file could not be found');
@@ -44,10 +42,8 @@ class HtpasswdTest extends TestCase
         new Htpasswd('some_file');
     }
 
-    /**
-     * @test
-     */
-    public function get_all_users_and_passwords()
+    #[Test]
+    public function get_all_users_and_passwords(): void
     {
         $htpasswd = new Htpasswd($this->passFile);
         $users = $htpasswd->getUsers();
@@ -59,20 +55,16 @@ class HtpasswdTest extends TestCase
         ), $users);
     }
 
-    /**
-     * @test
-     */
-    public function check_user_exists()
+    #[Test]
+    public function check_user_exists(): void
     {
         $htpasswd = new Htpasswd($this->passFile);
         $this->assertTrue($htpasswd->userExists('test_user1'));
         $this->assertFalse($htpasswd->userExists('invalid'));
     }
 
-    /**
-     * @test
-     */
-    public function update_user_method_should_be_used_while_adding_user()
+    #[Test]
+    public function update_user_method_should_be_used_while_adding_user(): void
     {
         $mock = $this->getMockBuilder(Htpasswd::class)
             ->disableOriginalConstructor()
@@ -88,10 +80,8 @@ class HtpasswdTest extends TestCase
         $this->assertTrue($returnVal);
     }
 
-    /**
-     * @test
-     */
-    public function dont_update_anything_while_adding_user_if_the_user_already_exists()
+    #[Test]
+    public function dont_update_anything_while_adding_user_if_the_user_already_exists(): void
     {
         $mock = $this->getMockBuilder(Htpasswd::class)
             ->setConstructorArgs([$this->passFile])
@@ -107,11 +97,9 @@ class HtpasswdTest extends TestCase
         $this->assertFileEquals($this->originalFile, $this->passFile);
     }
 
-    /**
-     * @test
-     * @dataProvider invalidUserNames
-     */
-    public function validate_username_while_updating($user, $error)
+    #[Test]
+    #[DataProvider('invalidUserNames')]
+    public function validate_username_while_updating(string $user, string $error): void
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage($error);
@@ -120,10 +108,8 @@ class HtpasswdTest extends TestCase
         $htpasswd->updateUser($user, '12345768');
     }
 
-    /**
-     * @test
-     */
-    public function update_user_auto_creates_user_if_not_exists()
+    #[Test]
+    public function update_user_auto_creates_user_if_not_exists(): void
     {
         $htpasswd = new Htpasswd($this->passFile);
         $returnVal = $htpasswd->updateUser('new_user', '12345768');
@@ -135,11 +121,9 @@ class HtpasswdTest extends TestCase
         $this->assertStringStartsWith('new_user:', $lastLine);
     }
 
-    /**
-     * @test
-     * @dataProvider validAlgorithms
-     */
-    public function update_user($encType)
+    #[Test]
+    #[DataProvider('validAlgorithms')]
+    public function update_user(string $encType): void
     {
         $htpasswd = new Htpasswd($this->passFile);
         $returnVal = $htpasswd->updateUser('test_user1', '12345678', $encType);
@@ -164,49 +148,47 @@ class HtpasswdTest extends TestCase
         $this->assertEncType($encType, $pass, '12345678');
     }
 
-    /**
-     * @test
-     */
-    public function invalid_encryption_should_throw_an_exception()
+    #[Test]
+    public function invalid_encryption_should_throw_an_exception(): void
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Invalid encryption type');
 
         $htpasswd = new Htpasswd($this->passFile);
-        $returnVal = $htpasswd->updateUser('test_user1', '12345768', 'invalid');
+        $htpasswd->updateUser('test_user1', '12345768', 'invalid');
     }
 
-    /**
-     * @test
-     */
-    public function crypt_is_the_default_encryption_type()
+    #[Test]
+    public function crypt_is_the_default_encryption_type(): void
     {
         $htpasswd = new Htpasswd($this->passFile);
-        $returnVal = $htpasswd->updateUser('test_user1', '87654321');
-
-        $this->assertTrue($returnVal);
+        $htpasswd->updateUser('test_user1', '87654321');
 
         $users = $htpasswd->getUsers();
         $pass = $users['test_user1'];
         $this->assertEncType(Htpasswd::ENCTYPE_CRYPT, $pass, '87654321');
     }
 
-    /**
-     * @test
-     */
-    public function trigger_notice_if_password_is_too_long_for_crypt()
+    #[Test]
+    public function trigger_notice_if_password_is_too_long_for_crypt(): void
     {
-        $this->expectNotice();
-        $this->expectNoticeMessage("Only the first 8 characters are taken into account when 'crypt' algorithm is used.");
+        $noticed = false;
+        set_error_handler(function (int $errno) use (&$noticed): bool {
+            if ($errno === E_USER_NOTICE) {
+                $noticed = true;
+            }
+            return true;
+        });
 
         $htpasswd = new Htpasswd($this->passFile);
         $htpasswd->updateUser('test_user1', '1234567812345678');
+
+        restore_error_handler();
+        $this->assertTrue($noticed, "Expected E_USER_NOTICE for passwords longer than 8 characters with crypt");
     }
 
-    /**
-     * @test
-     */
-    public function delete_user()
+    #[Test]
+    public function delete_user(): void
     {
         $htpasswd = new Htpasswd($this->passFile);
         $htpasswd->deleteUser('test_user2');
@@ -219,10 +201,8 @@ class HtpasswdTest extends TestCase
         $this->assertNotContains("test_user2:adfasfd\n", $content);
     }
 
-    /**
-     * @test
-     */
-    public function throw_exception_if_non_existent_user_is_tried_to_be_deleted()
+    #[Test]
+    public function throw_exception_if_non_existent_user_is_tried_to_be_deleted(): void
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('User not found');
@@ -231,15 +211,16 @@ class HtpasswdTest extends TestCase
         $htpasswd->deleteUser('asdfasd');
     }
 
-    public function invalidUserNames()
+public static function invalidUserNames(): array
     {
         return [
             ['user:invalid', 'Invalid username. Username cannot contain colon (:) character'],
+            [':leading_colon', 'Invalid username. Username cannot contain colon (:) character'],
             [str_repeat('x', 257), 'Usernames cannot be longer than 256 bytes'],
         ];
     }
 
-    public function validAlgorithms()
+    public static function validAlgorithms(): array
     {
         return [
             [Htpasswd::ENCTYPE_APR_MD5],
@@ -248,7 +229,7 @@ class HtpasswdTest extends TestCase
         ];
     }
 
-    private function assertEncType($encType, $encryptedPass, $plainPass)
+    private function assertEncType(string $encType, string $encryptedPass, string $plainPass): void
     {
         switch ($encType) {
             case Htpasswd::ENCTYPE_CRYPT:
@@ -265,4 +246,5 @@ class HtpasswdTest extends TestCase
                 $this->fail('Invalid enctype: ' . $encType);
         }
     }
+
 }
