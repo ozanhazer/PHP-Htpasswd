@@ -2,42 +2,56 @@
 
 ![Unit Tests](https://github.com/ozanhazer/PHP-Htpasswd/actions/workflows/php.yml/badge.svg)
 
-PHP Htpasswd writer for Apache. You can add or delete users, or update their passwords.
+A lightweight PHP library for reading and writing Apache htpasswd files. You can add or delete users or update their passwords.
+
+## Requirements
+
+- PHP 7.2 or higher (tested on 8.2–8.5)
 
 ## Features
 
- * Supports `crypt`, `md5` and `sha1` algorithms
- * Locks the htpasswd file to prevent conflicts while writing.
- * Throws an error on invalid usernames.
- * Unit tested.
- * Whole htpasswd file is read into the memory so be careful if you have lots of users
-(In fact you should consider a different kind of authentication mechanism if you
-have that many users)
+- Supports `crypt`, APR-MD5 and SHA-1 algorithms
+- Locks the htpasswd file to prevent conflicts while writing
+- Throws exceptions on invalid usernames
+- Unit tested
+
+> **Note:** The entire htpasswd file is loaded into memory. If you have a very large number of users, consider a different authentication mechanism.
+
+## Installation
+
+```bash
+composer require ozanhazer/php-htpasswd
+```
 
 ## Usage
 
-Install: `composer require ozanhazer/php-htpasswd`
+The `Htpasswd` class has no namespace, so it works in both non-namespaced and namespaced projects:
 
 ```php
-$htpasswd = new Htpasswd('.htpasswd');
+use Htpasswd;
+
+$htpasswd = new Htpasswd('/path/to/.htpasswd');
 $htpasswd->addUser('ozan', '123456');
 $htpasswd->updateUser('ozan', '654321');
 $htpasswd->deleteUser('ozan');
 ```
 
-Apache htpasswd can be encrypted in three ways: crypt (unix only), a modified version of md5 and sha1.
-You can define the encryption method when you're setting the password:
+### Encryption algorithms
+
+Apache htpasswd supports three password formats. You can specify the algorithm when adding or updating a user:
+
 ```php
 $htpasswd->addUser('ozan', '123456', Htpasswd::ENCTYPE_APR_MD5);
 $htpasswd->addUser('ozan', '123456', Htpasswd::ENCTYPE_SHA1);
+$htpasswd->addUser('ozan', '123456', Htpasswd::ENCTYPE_CRYPT);  // default
 ```
 
-(Yes, you may use different algorithms per user in the same passwd file...)
+Different users in the same htpasswd file can use different algorithms.
 
-See [the Apache documentation](https://httpd.apache.org/docs/2.2/misc/password_encryptions.html) for encryption details. 
+See the [Apache documentation](https://httpd.apache.org/docs/2.4/misc/password_encryptions.html) for details on each format.
 
 ## Tips
 
-* Do not prefer `ENCTYPE_CRYPT` on Windows servers since it's not available on Windows by default.
-* `ENCTYPE_CRYPT` passwords are limited to 8 characters and extra characters will be ignored so the library will trigger 
-  a notice if long passwords are provided.
+- Avoid `ENCTYPE_CRYPT` on Windows — it is not available by default.
+- `ENCTYPE_CRYPT` passwords are limited to 8 characters; extra characters are silently ignored. The library will trigger a notice if a longer password is provided.
+- SHA-1 (`ENCTYPE_SHA1`) is considered weak. APR-MD5 is the most broadly compatible option; bcrypt is recommended if you are on Apache 2.4+.
