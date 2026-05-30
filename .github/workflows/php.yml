@@ -3,6 +3,30 @@ name: Unit Tests
 on: [push, pull_request]
 
 jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ['7.2', '7.3', '7.4', '8.0', '8.1']
+
+    name: Installable on PHP ${{ matrix.php-versions }}
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Install PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
+
+    - name: Validate composer.json
+      run: composer validate --strict
+
+    - name: Install package (no dev dependencies)
+      run: composer install --no-dev --prefer-dist --no-progress
+
+    - name: Syntax check
+      run: php -l Htpasswd.php
+
   build:
     runs-on: ubuntu-latest
     strategy:
